@@ -35,4 +35,11 @@ jobs:
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
       - name: Build library
         run: make
+      - name: Bundle libhdf5
+        run: tar -C wasm_build/hdf5/ -czf libhdf5_wasm.tgz include lib
+      - name: Upload libhdf5
+        uses: actions/upload-artifact@v2
+        with:
+          name: libhdf5_wasm.tgz
+          path: libhdf5_wasm.tgz
         
