@@ -35,11 +35,25 @@ jobs:
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
       - name: Build library
         run: make
+      - name: Bundle
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: |
+          npm install
+          npm pack
+          echo "NPM_TGZ=$(ls h5wasm*.tgz)" >> $GITHUB_ENV
+      - name: Bundle libhdf5
+        run: tar -C wasm_build/hdf5/ -czf libhdf5_wasm.tgz include lib
       - name: Upload libhdf5
         uses: actions/upload-artifact@v2
         with:
-          name: libhdf5_wasm.tgz
-          path: |
-            wasm_build/hdf5/lib/
-            wasm_build/hdf5/include/
-        
+          path: libhdf5_wasm.tgz
+      - name: Update current release
+        if: startsWith(github.ref, 'refs/tags')
+        uses: johnwbyrd/update-release@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            libhdf5_wasm.tgz
+            ${{ env.NPM_TGZ }}
